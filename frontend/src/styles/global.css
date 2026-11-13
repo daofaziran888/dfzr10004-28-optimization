@@ -33,3 +33,18 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .link { border: none; background: none; color: var(--brand); cursor: pointer; padding: 0; }
 .page-foot { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--muted); }
 .error-text { color: #b42318; }
+.ok-text { color: #067647; }
+.pager { display: inline-flex; gap: 6px; align-items: center; }
+.pager .btn { padding: 4px 10px; font-size: 12px; }
+.pager .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.page-jump { width: 64px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
+.sort-bar { align-items: center; gap: 8px; }
+.sort-label { font-size: 12px; color: var(--muted); }
+.active-row td { background: #eff6ff; }
+.review-panel { margin-top: 16px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; }
+.review-panel h3 { margin: 4px 0 10px; font-size: 15px; }
+.review-panel h3 small { color: var(--muted); font-weight: normal; margin-left: 8px; font-size: 12px; }
+.panel-foot { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.panel-tip { font-size: 12px; color: var(--muted); }
+.review-banner { display: flex; justify-content: space-between; align-items: center; background: #fffaeb; border: 1px solid #fedf89; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px; }
+.filter-item select { padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: #fff; }

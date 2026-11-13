@@ -15,6 +15,7 @@ const Alert = () => import('@/views/alert/index.vue')
 const Report = () => import('@/views/report/index.vue')
 const Throttle = () => import('@/views/throttle/index.vue')
 const Tag = () => import('@/views/tag/index.vue')
+const TagReview = () => import('@/views/tag/review.vue')
 const Version = () => import('@/views/version/index.vue')
 const Sandbox = () => import('@/views/sandbox/index.vue')
 
@@ -36,6 +37,7 @@ const router = createRouter({
     { path: '/report', name: 'report', component: Report },
     { path: '/throttle', name: 'throttle', component: Throttle },
     { path: '/tag', name: 'tag', component: Tag },
+    { path: '/tag/review', name: 'tag-review', component: TagReview },
     { path: '/version', name: 'version', component: Version },
     { path: '/sandbox', name: 'sandbox', component: Sandbox },
   ],

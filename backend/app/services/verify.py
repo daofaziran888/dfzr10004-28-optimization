@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.services import tag_review
 from app.store import store
 
 MODULE = "verify"
@@ -10,6 +11,29 @@ REQUIRED_FIELDS = ["规则编号", "校验对象", "校验类型"]
 STATUS_ORDER = ["草稿", "运行中", "已暂停", "已归档"]
 ACTION_RULES = {"启动校验": "草稿", "暂停校验": "运行中", "归档规则": "已暂停"}
 NEGATIVE_ACTIONS = []
+
+# 待复核清单行：由标注复核批次进度实时重算，不占用真实规则编号。
+REVIEW_ROW_CODE = "VERI-TAG-REVIEW"
+REVIEW_ROW_ID = 900001
+
+
+def review_checklist_row() -> dict[str, Any]:
+    summary = tag_review.pending_summary()
+    return {
+        "id": REVIEW_ROW_ID,
+        "规则编号": REVIEW_ROW_CODE,
+        "校验对象": "标注复核批次",
+        "校验类型": "待复核清单",
+        "校验表达式": f"待裁定 {summary['待裁定']} 条 + 已退回 {summary['已退回']} 条",
+        "阈值配置": "0",
+        "采样比例": "全量",
+        "阻断级别": "提示",
+        "最近校验": summary["最后修改时间"] or "—",
+        "待复核数量": summary["待复核"],
+        "status": "运行中" if summary["待复核"] else "已暂停",
+        "pending": summary["待复核"] > 0,
+        "abnormal": False,
+    }
 
 
 class VerifyService:
@@ -26,6 +50,11 @@ class VerifyService:
             rows = [row for row in rows if keyword in str(row.get("规则编号", ""))]
         if status:
             rows = [row for row in rows if row.get("status") == status]
+        review_row = review_checklist_row()
+        keyword_hit = not keyword or keyword in str(review_row["规则编号"]) or keyword in str(review_row["校验对象"])
+        status_hit = not status or review_row["status"] == status
+        if keyword_hit and status_hit:
+            rows = [review_row] + list(rows)
         total = len(rows)
         start = max(page - 1, 0) * size
         return rows[start:start + size], total

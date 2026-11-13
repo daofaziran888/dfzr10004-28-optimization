@@ -19,3 +19,15 @@ export async function fetchJson<T>(path: string): Promise<T> {
   }
   return (await response.json()) as T
 }
+
+/** 从错误响应里读出后端给的明确提示（如复核冲突说明），读不到就用兜底文案。 */
+export async function readError(response: Response, fallback: string): Promise<string> {
+  try {
+    const data = (await response.json()) as { detail?: unknown; message?: unknown }
+    if (typeof data?.detail === 'string' && data.detail) return data.detail
+    if (typeof data?.message === 'string' && data.message) return data.message
+  } catch {
+    /* 响应体不是 JSON 时走兜底文案 */
+  }
+  return fallback
+}

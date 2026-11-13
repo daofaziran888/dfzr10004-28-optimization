@@ -18,6 +18,14 @@
       </article>
     </div>
 
+    <div v-if="pendingReview" class="review-banner">
+      <span>
+        标注待复核清单：当前 <strong>{{ pendingReview.待复核数量 }}</strong> 条待复核
+        （随标注批次进度实时重算，最近变更 {{ pendingReview.最近校验 }}）
+      </span>
+      <RouterLink class="link" to="/tag/review">前往复核批次</RouterLink>
+    </div>
+
     <form class="filter-bar" @submit.prevent="reload">
       <label v-for="field in filterFields" :key="field" class="filter-item">
         <span>{{ field }}</span>
@@ -63,13 +71,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { request } from '@/api/client'
 
 type Row = Record<string, string | number | null>
 
 const ENDPOINT = '/api/verify'
+const REVIEW_ROW_CODE = 'VERI-TAG-REVIEW'
 const columns = ["规则编号", "校验对象", "校验类型", "校验表达式", "阈值配置", "采样比例", "阻断级别", "最近校验"]
 const actions = ["启动校验", "暂停校验", "归档规则"]
 const statuses = ["草稿", "运行中", "已暂停", "已归档"]
@@ -80,6 +89,9 @@ const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
+
+// 待复核清单行：由后端按标注批次进度重算后随清单一起返回
+const pendingReview = computed(() => rows.value.find((row) => row['规则编号'] === REVIEW_ROW_CODE))
 
 function resetFilters() {
   filters.value = {}

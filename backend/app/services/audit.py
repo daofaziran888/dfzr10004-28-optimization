@@ -1,6 +1,7 @@
 """采集审计日志业务规则：状态流转、字段校验与筛选口径都收在这里。"""
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 from app.store import store
@@ -10,6 +11,47 @@ REQUIRED_FIELDS = ["记录编号", "操作类型", "采集计划"]
 STATUS_ORDER = ["已记录", "已复核", "已归档"]
 ACTION_RULES = {"标记复核": "已记录", "归档记录": "已复核"}
 NEGATIVE_ACTIONS = []
+
+
+def _next_sequence(rows: list[dict[str, Any]]) -> int:
+    seq = 0
+    for row in rows:
+        code = str(row.get("记录编号", "") or "")
+        if code.startswith("AUDI-"):
+            try:
+                seq = max(seq, int(code.split("-", 1)[1]))
+            except ValueError:
+                continue
+    return seq + 1
+
+
+def record_change(
+    *,
+    操作类型: str,
+    采集计划: str,
+    执行人: str,
+    结果摘要: str,
+    变更内容: str,
+) -> dict[str, Any]:
+    """把一次业务变更落进审计日志，返回新记录；编号沿现有 AUDI- 序列递增。"""
+    rows = store.rows(MODULE)
+    seq = _next_sequence(rows)
+    entry = {
+        "id": max((int(row.get("id", 0)) for row in rows), default=0) + 1,
+        "记录编号": f"AUDI-{seq:04d}",
+        "操作类型": 操作类型,
+        "采集计划": 采集计划,
+        "执行人": 执行人,
+        "执行时间": datetime.now().isoformat(timespec="seconds"),
+        "结果摘要": 结果摘要,
+        "变更内容": 变更内容,
+        "复核状态": "已记录",
+        "status": STATUS_ORDER[0],
+        "pending": True,
+        "abnormal": False,
+    }
+    rows.append(entry)
+    return entry
 
 
 class AuditService:
